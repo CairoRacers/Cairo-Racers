@@ -152,13 +152,13 @@
 
     <!-- Header -->
     <header class="bg-[#1a1a1a] text-white p-6 md:px-12 flex justify-between items-center fixed top-0 left-0 w-full z-50 shadow-lg">
-        <!-- ADDED mr-8 for spacing -->
-        <div class="flex items-center space-x-4 mr-8">
+        <!-- ✅ CHANGED: wrap logo+text in a clickable link that opens home-page -->
+        <a href="#" data-page="home-page" class="flex items-center space-x-4 mr-8 page-link cursor-pointer">
             <!-- Logo -->
             <img src="https://i.postimg.cc/6p5SRXMn/3550-A7-F3-9-F9-F-4-B19-A37-F-09-F1618-E58-EA.png" alt="Cairo Racers Logo" class="h-10 md:h-12 rounded-lg">
             <!-- APPLIED FONT-AKIRA -->
             <span class="text-2xl md:text-3xl font-bold gradient-text font-akira" data-lang-key="logo_title">CAIRO RACERS</span>
-        </div>
+        </a>
         
         <!-- Language Toggle Button and Menu Button -->
         <div class="flex items-center space-x-4">
