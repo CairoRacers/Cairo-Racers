@@ -6,6 +6,7 @@
 <title>Cairo Racers - Assetto Corsa Community</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.paypal.com/sdk/js?client-AUtv34p2GprjjGh9voPIjosZhJmyYeHZ4ThwvdE50qKFsxMK7kbutleFV-HvwrEpeFpgqeQcOqdQ6gg"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -416,7 +417,7 @@
                         <h3 class="text-3xl font-bold mb-2 gradient-text font-akira" data-lang-key="item_graphics_pack_title">Graphics Pack</h3>
                         <p class="text-lg text-gray-300" data-lang-key="item_graphics_pack_desc">Enhance your game with our custom graphics pack, featuring realistic lighting, weather effects, and textures.</p>
                         <span class="text-4xl font-extrabold text-red-500 mb-6" data-lang-key="item_graphics_pack_price">250 EGP</span>
-                        <a href="#" class="inline-block px-8 py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg hover:bg-red-700 transition-colors duration-300 button-hover-effect" data-lang-key="btn_buy_now">BUY NOW</a>
+                        <button type="button" onclick="addToCart('Graphics Pack', 250)" class="inline-block px-8 py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg hover:bg-red-700 transition-colors duration-300 button-hover-effect" data-lang-key="btn_add_to_cart">ADD TO CART</button>
                     </div>
             
                     <!-- Assetto Corsa Original Card -->
@@ -426,9 +427,38 @@
                         <h3 class="text-3xl font-bold mb-2 gradient-text font-akira" data-lang-key="item_original_title">Assetto Corsa Original</h3>
                         <p class="text-lg text-gray-300" data-lang-key="item_original_desc">Purchase the official Assetto Corsa game, supporting the developers and ensuring a seamless experience.</p>
                         <span class="text-4xl font-extrabold text-red-500 mb-6" data-lang-key="item_original_price">400 EGP</span>
-                        <a href="#" class="inline-block px-8 py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg hover:bg-red-700 transition-colors duration-300 button-hover-effect" data-lang-key="btn_buy_now">BUY NOW</a>
+                        <button type="button" onclick="addToCart('Assetto Corsa Original', 400)" class="inline-block px-8 py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg hover:bg-red-700 transition-colors duration-300 button-hover-effect" data-lang-key="btn_add_to_cart">ADD TO CART</button>
+                    </div>
+                
+                <!-- CART + CHECKOUT (Added) -->
+                <div class="mt-12 bg-[#1a1a1a] p-8 rounded-xl shadow-2xl border border-gray-700">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <h2 class="text-3xl font-extrabold gradient-text font-akira" data-lang-key="cart_title">Cart</h2>
+                            <p class="text-gray-400 mt-2" data-lang-key="cart_desc">Add items, then checkout with PayPal or card.</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg text-gray-300"><span data-lang-key="cart_total_label">Total</span>:</div>
+                            <div class="text-4xl font-extrabold text-red-500"><span id="cart-total">0</span> <span id="cart-currency">EGP</span></div>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-gray-700 w-full my-6"></div>
+
+                    <ul id="cart-items" class="space-y-3"></ul>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                        <button type="button" onclick="clearCart()" class="px-6 py-3 bg-gray-700 hover:bg-gray-800 rounded-full font-semibold" data-lang-key="cart_clear">Clear Cart</button>
+                        <button type="button" onclick="openCheckout()" class="px-6 py-3 bg-white text-gray-900 hover:bg-gray-200 rounded-full font-extrabold" data-lang-key="cart_checkout">Checkout</button>
+                    </div>
+
+                    <div id="paypal-checkout-wrap" class="mt-6 hidden">
+                        <div class="text-gray-300 mb-3" data-lang-key="cart_checkout_note">Pay with PayPal or card:</div>
+                        <div id="paypal-button-container"></div>
                     </div>
                 </div>
+
+</div>
             </div>
         </section>
 
@@ -543,6 +573,16 @@
                 'contact_desc': 'We\'d love to hear from you! Whether you have questions about our events, want to collaborate, or just want to say hello, feel free to reach out.',
                 'contact_email': 'Email',
                 'contact_socials': 'Socials',
+                'btn_add_to_cart': 'ADD TO CART',
+                'cart_title': 'Cart',
+                'cart_desc': 'Add items, then checkout with PayPal or card.',
+                'cart_total_label': 'Total',
+                'cart_clear': 'Clear Cart',
+                'cart_checkout': 'Checkout',
+                'cart_checkout_note': 'Pay with PayPal or card:',
+                'cart_empty': 'Your cart is empty.',
+                'cart_item_remove': 'Remove',
+                'cart_need_items': 'Add items to your cart first.',
             },
             'ar': {
                 'logo_title': 'كايرو ريسرز',
@@ -605,7 +645,11 @@
             }
         };
 
+        // Expose for cart UI
+        window.translations = translations;
+
         let currentLang = 'en';
+        window.currentLang = currentLang;
         
         // Function to apply translations and RTL/LTR direction
         window.applyTranslations = (lang) => {
@@ -700,6 +744,118 @@
             showPage('home-page');
         });
     </script>
+
+    <!-- CART + PAYPAL SCRIPT (Added) -->
+    <script>
+        window.cart = window.cart || [];
+
+        function addToCart(name, price) {
+            window.cart.push({ name, price: Number(price) || 0 });
+            renderCart();
+        }
+
+        function removeFromCart(index) {
+            window.cart.splice(index, 1);
+            renderCart();
+        }
+
+        function clearCart() {
+            window.cart = [];
+            renderCart();
+            closeCheckout();
+        }
+
+        function getCartTotal() {
+            return window.cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+        }
+
+        function renderCart() {
+            const itemsEl = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            if (!itemsEl || !totalEl) return;
+
+            itemsEl.innerHTML = '';
+            if (!window.cart.length) {
+                itemsEl.innerHTML = `<li class="text-gray-400" data-lang-key="cart_empty">${(window.translations && window.translations[window.currentLang] && window.translations[window.currentLang].cart_empty) ? window.translations[window.currentLang].cart_empty : 'Your cart is empty.'}</li>`;
+            } else {
+                window.cart.forEach((item, idx) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center justify-between bg-[#0f0f0f] border border-gray-700 rounded-lg p-4';
+                    li.innerHTML = `
+                        <div class="font-semibold">${escapeHtml(item.name)}</div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-red-500 font-extrabold">${Number(item.price).toFixed(0)} <span>EGP</span></div>
+                            <button type="button" class="text-gray-300 hover:text-red-500 underline" onclick="removeFromCart(${idx})" data-lang-key="cart_item_remove">Remove</button>
+                        </div>
+                    `;
+                    itemsEl.appendChild(li);
+                });
+            }
+
+            totalEl.textContent = String(getCartTotal().toFixed(2));
+            if (window.applyTranslations) window.applyTranslations(window.currentLang || 'en');
+        }
+
+        function openCheckout() {
+            const total = getCartTotal();
+            if (!total) {
+                alert((window.translations && window.translations[window.currentLang] && window.translations[window.currentLang].cart_need_items) ? window.translations[window.currentLang].cart_need_items : 'Add items to your cart first.');
+                return;
+            }
+            const wrap = document.getElementById('paypal-checkout-wrap');
+            if (wrap) wrap.classList.remove('hidden');
+        }
+
+        function closeCheckout() {
+            const wrap = document.getElementById('paypal-checkout-wrap');
+            if (wrap) wrap.classList.add('hidden');
+        }
+
+        function initPayPalButtons() {
+            if (!window.paypal || !document.getElementById('paypal-button-container')) return;
+
+            const container = document.getElementById('paypal-button-container');
+            if (container.dataset.rendered === '1') return;
+            container.dataset.rendered = '1';
+
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    const total = getCartTotal();
+                    if (!total) {
+                        alert((window.translations && window.translations[window.currentLang] && window.translations[window.currentLang].cart_need_items) ? window.translations[window.currentLang].cart_need_items : 'Add items to your cart first.');
+                        return;
+                    }
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { value: total.toFixed(2) }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function() {
+                        alert('Payment successful!');
+                        clearCart();
+                    });
+                }
+            }).render('#paypal-button-container');
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+            initPayPalButtons();
+        });
+    </script>
+
 </body>
 
 </html>
+
