@@ -827,7 +827,7 @@
                         alert((window.translations && window.translations[window.currentLang] && window.translations[window.currentLang].cart_need_items) ? window.translations[window.currentLang].cart_need_items : 'Add items to your cart first.');
                         return;
                     }
-                    return actions.order.create({
+                   return actions.order.create({
   purchase_units: [{
     amount: {
       value: total.toFixed(2)
@@ -837,6 +837,8 @@
     shipping_preference: "NO_SHIPPING"
   }
 });
+
+
     
                     });
                 },
@@ -867,6 +869,7 @@
 </body>
 
 </html>
+
 
 
 
